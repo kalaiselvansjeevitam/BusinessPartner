@@ -10,8 +10,8 @@ import Swal from "sweetalert2";
 
 const axiosInstance = axios.create({
   // baseURL: "http://localhost/olympiad/",
-  baseURL: "https://jeevitam.in/olympiad/",
-  // baseURL :"https://jeevitam.com/olympiad/",
+  // baseURL: "https://jeevitam.in/businesspartner/",
+  baseURL :"https://bp.jeevitam.com/businesspartner/",
   timeout: DEFAULT_API_TIMEOUT,
   headers: {
     "Content-Type": "application/json",

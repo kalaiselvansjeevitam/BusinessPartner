@@ -8,9 +8,11 @@ export const ROUTE_URL = {
   profile: "/business-partner/profile",
   product_details: "/business-partner/Product-Details",
   productView: "/business-partner/productView",
-  addlead : "/business-partner/add-lead"
+  leadsView: "/business-partner/View-Leads",
+  addlead: "/business-partner/add-lead",
 };
 
 export const API_URL = {
-  login: "/api/adminUserLogin",
+  login: "/api/admin/login",
+  getProductsList : "/api/admin/getProductsList",
 };

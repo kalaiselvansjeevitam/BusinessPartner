@@ -28,32 +28,32 @@ const Login = () => {
 
   console.log(logIn);
   const handleLogin = async () => {
-  setSubmitted(true);
+    setSubmitted(true);
 
-  if (!loginData.username || !loginData.password) return;
+    if (!loginData.username || !loginData.password) return;
 
-  const STATIC_USERNAME = "BusinessPartner1";
-  const STATIC_PASSWORD = "BP@123";
+    const STATIC_USERNAME = "BusinessPartner1";
+    const STATIC_PASSWORD = "BP@123";
 
-  try {
-    if (
-      loginData.username !== STATIC_USERNAME ||
-      loginData.password !== STATIC_PASSWORD
-    ) {
-      setErrorMessage("Invalid username or password");
-      return;
+    try {
+      if (
+        loginData.username !== STATIC_USERNAME ||
+        loginData.password !== STATIC_PASSWORD
+      ) {
+        setErrorMessage("Invalid username or password");
+        return;
+      }
+
+      setErrorMessage("");
+
+      sessionStorage.setItem("session_token", "static_session_token");
+      sessionStorage.setItem("username", STATIC_USERNAME);
+
+      navigate(ROUTE_URL.dashboard);
+    } catch (error: any) {
+      setErrorMessage("Something went wrong. Please try again.");
     }
-
-    setErrorMessage("");
-
-    sessionStorage.setItem("session_token", "static_session_token");
-    sessionStorage.setItem("username", STATIC_USERNAME);
-
-    navigate(ROUTE_URL.dashboard);
-  } catch (error: any) {
-    setErrorMessage("Something went wrong. Please try again.");
-  }
-};
+  };
 
   // const handleLogin = async () => {
   //   setSubmitted(true);

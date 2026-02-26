@@ -14,7 +14,7 @@ export default defineConfig({
   },
   server: {
     host: true,
-    allowedHosts: ["052d6beb1bf7.ngrok-free.app"],
+    allowedHosts: ["niobous-angelica-mustily.ngrok-free.dev"],
   },
   build: {
     minify: "esbuild",

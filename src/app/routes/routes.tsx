@@ -8,6 +8,7 @@ import ProfilePage from "../../pages/Profile/Profile";
 import { ProductDetails } from "../../pages/ProductDetails/ProductDetails";
 import { ProductView } from "../../pages/ProductDetails/shared/ProductView";
 import { AddLeads } from "../../pages/ProductDetails/shared/AddLeads";
+import { LeadsView } from "../../pages/ProductDetails/shared/LeadsView";
 
 // import Login from '@/pages/Login/Login';
 // import Dashboard from '@/pages/Dashboard/Dashboard';
@@ -56,6 +57,14 @@ export const authProtectedRoutes = [
         element: (
           <>
             <ProductView />
+          </>
+        ),
+      },
+      {
+        path: ROUTE_URL.leadsView,
+        element: (
+          <>
+            <LeadsView />
           </>
         ),
       },

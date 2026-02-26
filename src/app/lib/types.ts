@@ -15,6 +15,17 @@ export interface GetStudentDetails {
   ];
 }
 
+// types/leads.ts (or inline)
+export type LeadData = {
+  customer_name: string;
+  customer_number: string;
+  email: string;
+  address: string;
+  company: string;
+  city: string;
+  pincode: string;
+};
+
 export interface GetSchoolResgistrations {
   result: string;
   message: string;
