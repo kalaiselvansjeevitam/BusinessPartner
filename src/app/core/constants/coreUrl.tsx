@@ -14,5 +14,6 @@ export const ROUTE_URL = {
 
 export const API_URL = {
   login: "/api/admin/login",
-  getProductsList : "/api/admin/getProductsList",
+  getProductsList: "/api/admin/getProductsList",
+  getProductDetail: "/api/admin/getProductDetails",
 };

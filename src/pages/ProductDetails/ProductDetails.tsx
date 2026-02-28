@@ -63,10 +63,10 @@ export const ProductDetails = () => {
     {
       key: "addLeads",
       label: "Add Leads",
-      render: (_,) => (
+      render: (_, row) => (
         <Button
           className="bg-blue-600 hover:bg-blue-700 text-white"
-          onClick={() => navigate(`${ROUTE_URL.addlead}`)}
+          onClick={() => navigate(`${ROUTE_URL.addlead}?ID=${row.id}`)}
         >
           Add Lead
         </Button>
@@ -88,11 +88,11 @@ export const ProductDetails = () => {
     {
       key: "viewdetails",
       label: "View Details",
-      render: (_) => (
+      render: (_, row) => (
         <Button
           size="sm"
           variant="outline"
-          onClick={() => navigate(`${ROUTE_URL.productView}`)}
+          onClick={() => navigate(`${ROUTE_URL.productView}?ID=${row.id}`)}
         >
           View Details
         </Button>
