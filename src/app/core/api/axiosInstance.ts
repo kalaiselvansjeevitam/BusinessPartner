@@ -20,7 +20,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("session_token");
-  const userId = sessionStorage.getItem("admin_user_id");
+  const userId = sessionStorage.getItem("user_id");
 
   if (config.url?.includes("/adminUserLogin")) {
     return config;
@@ -34,18 +34,18 @@ axiosInstance.interceptors.request.use((config) => {
     if (config.data) {
       if (config.data instanceof FormData) {
         if (token) config.data.append("session_token", token);
-        if (userId) config.data.append("admin_user_id", userId);
+        if (userId) config.data.append("user_id", userId);
       } else if (typeof config.data === "object") {
         config.data = {
           ...config.data,
           session_token: token,
-          admin_user_id: userId,
+          user_id: userId,
         };
       }
     } else {
       config.data = {
         session_token: token,
-        admin_user_id: userId,
+        user_id: userId,
       };
     }
   }

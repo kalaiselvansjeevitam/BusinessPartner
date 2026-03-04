@@ -2,11 +2,9 @@ import Layout from "../../../app/components/Layout/Layout";
 import { Button } from "../../../app/components/ui/button";
 import { Download, ArrowLeft, Loader } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  getProductsDetail,
-  type ProductDetail,
-} from "../../../app/core/api/api.services";
+import { getProductsDetail } from "../../../app/core/api/api.services";
 import { useEffect, useState } from "react";
+import type { ProductDetail } from "../../../app/lib/types";
 
 export const ProductView = () => {
   const { mutateAsync: productDetails } = getProductsDetail();

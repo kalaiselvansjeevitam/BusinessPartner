@@ -16,4 +16,9 @@ export const API_URL = {
   login: "/api/admin/login",
   getProductsList: "/api/admin/getProductsList",
   getProductDetail: "/api/admin/getProductDetails",
+  getProfileDetial: "/api/admin/getBusinessPartnerTotalProfileDetails",
+  updateProfileDetails: "/api/admin/update-profile-details",
+  addLeads: "/api/admin/createLead",
+  getStates: "/api/cities_languages/getStates",
+  viewLeads: "/api/admin/getLeadsList",
 };

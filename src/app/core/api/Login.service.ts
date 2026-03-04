@@ -9,17 +9,8 @@ type loginPayload = {
 type loginRes = {
   message: string;
   result: string;
-  data: {
-    id: string;
-    unique_user_id: string;
-    first_name: string;
-    last_name: string;
-    last_log_in: string;
-    last_login_via: string;
-    user_type: string;
-    session_token: string;
-    login_update: string;
-  };
+  user_id: string;
+  session_token: string;
 };
 export const login = () =>
   useMutation({

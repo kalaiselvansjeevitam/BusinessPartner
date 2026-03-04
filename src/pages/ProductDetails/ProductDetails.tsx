@@ -5,9 +5,10 @@ import TableComponent, {
 import { Button } from "../../app/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ROUTE_URL } from "../../app/core/constants/coreUrl";
-import { getProductsList, type Product } from "../../app/core/api/api.services";
+import { getProductsList } from "../../app/core/api/api.services";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import type { Product } from "../../app/lib/types";
 
 export const ProductDetails = () => {
   const { mutateAsync: productList } = getProductsList();
@@ -75,11 +76,11 @@ export const ProductDetails = () => {
     {
       key: "viewleads",
       label: "View Leads",
-      render: (_) => (
+      render: (_, row) => (
         <Button
           size="sm"
           variant="outline"
-          onClick={() => navigate(`${ROUTE_URL.leadsView}`)}
+          onClick={() => navigate(`${ROUTE_URL.leadsView}?ID=${row.id}`)}
         >
           View Leads
         </Button>

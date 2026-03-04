@@ -1,181 +1,437 @@
-import { useState } from "react";
-import React from "react";
+import { useEffect, useState } from "react";
 import Layout from "../../../app/components/Layout/Layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Button } from "../../../app/components/ui/button";
+import { getAddLeads, getStates } from "../../../app/core/api/api.services";
+import Swal from "sweetalert2";
+import { Loader } from "lucide-react";
+import type { StatesDetail } from "../../../app/lib/types";
 
 export const AddLeads = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const product_Id = searchParams.get("ID");
+  const { mutateAsync: addLead } = getAddLeads();
+  const { mutateAsync: getStatesApi } = getStates();
+  const [states, setStates] = useState<StatesDetail[]>([]);
+
+  const [loading, setLoading] = useState(false);
+  const token = sessionStorage.getItem("session_token");
+  const userId = sessionStorage.getItem("user_id");
   const [formData, setFormData] = useState({
-    customerName: "",
-    customerNumber: "",
-    email: "",
-    address: "",
-    company: "",
-    city: "",
-    pincode: "",
-    productSubscription: "",
+    user_id: userId,
+    session_token: token,
+    product_id: product_Id,
+    candidate_id: "",
+    candidate_name: "",
+    mobile_number: "",
+    state: "",
+    candidate_address: "",
+    age: "",
+    religion: "",
+    marital_status: "",
+    differently_abled: "",
+    education_level: "",
+    digital_proficiency_level: "",
+    english_proficiency_level: "",
+    family_income: "",
+    having_bank_account: "",
+    bank_holder_name: "",
+    bank_name: "",
+    bank_ifsc_code: "",
+    bank_account_number: "",
   });
+  const [qualificationImage, setQualificationImage] = useState<File | null>(
+    null,
+  );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
-    // TODO: API call here
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+    if (!file) return;
+    setQualificationImage(file);
   };
-  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const res = await getStatesApi();
+
+        if (res.result === "success") {
+          setStates(res.list);
+        } else {
+          console.error("States API returned error:", res.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch States", error);
+      }
+    };
+
+    fetchStates();
+  }, [getStatesApi]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const age = Number(formData.age);
+    if (age < 18 || age > 60) {
+      alert("Age must be between 18 and 60");
+      return;
+    }
+
+    console.log("Form Data:", formData);
+    const payload = new FormData();
+    payload.append("json_data", JSON.stringify(formData));
+    if (qualificationImage) {
+      payload.append("qualification_certificate", qualificationImage);
+    }
+    for (const pair of payload.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+    try {
+      setLoading(true);
+      const response = await addLead(payload);
+      if (response.result.toLowerCase() == "success") {
+        Swal.fire("Success", response?.message, "success");
+      }
+      setLoading(false);
+    } catch (error: any) {
+      Swal.fire("Error", error?.response?.data?.message, "error");
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const inputClass =
+    "w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500";
+
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
     <Layout headerTitle="Add Leads">
-      <div className="min-h-[calc(100vh-80px)] bg-gray-100 flex items-center justify-center px-4">
+      <div className="bg-gray-100 min-h-screen flex justify-center items-center p-4">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8"
+          className="bg-white w-full max-w-xl p-6 rounded-xl shadow space-y-5"
         >
           <button
-            type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            type="button"
+            className="text-sm text-gray-600"
           >
             ← Back
           </button>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-            Add Lead Details
-          </h2>
 
-          {/* Customer Name */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Customer Name
-            </label>
+          <h2 className="text-xl font-semibold text-center">Add Leads</h2>
+
+          {/* Candidate ID */}
+          <div>
+            <label className={labelClass}>Candidate ID</label>
             <input
-              type="text"
-              name="customerName"
-              value={formData.customerName}
+              name="candidate_id"
+              value={formData.candidate_id}
               onChange={handleChange}
+              className={inputClass}
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          {/* Customer Number */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Customer Number
-            </label>
+          {/* Candidate Name */}
+          <div>
+            <label className={labelClass}>Candidate Name</label>
             <input
-              type="tel"
-              name="customerNumber"
-              value={formData.customerNumber}
+              name="candidate_name"
+              value={formData.candidate_name}
               onChange={handleChange}
+              className={inputClass}
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+          {/* Mobile */}
+          <div>
+            <label className={labelClass}>Mobile Number</label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              name="mobile_number"
+              value={formData.mobile_number}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // remove non-numbers
+                setFormData((prev) => ({ ...prev, mobile_number: value }));
+              }}
+              className={inputClass}
+              maxLength={10}
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/* State */}
+          <div>
+            <label className={labelClass}>State</label>
+            <select
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            >
+              <option value="">Select State</option>
+              {states.map((item) => (
+                <option key={item.state} value={item.state}>
+                  {item.state}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Address */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
+          <div>
+            <label className={labelClass}>Address</label>
             <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
+              name="candidate_address"
               rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.candidate_address}
+              onChange={handleChange}
+              className={inputClass}
+              required
             />
           </div>
 
-          {/* Company */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company (Optional)
-            </label>
+          {/* Age */}
+          <div>
+            <label className={labelClass}>Age</label>
             <input
-              type="text"
-              name="company"
-              value={formData.company}
+              name="age"
+              type="number"
+              value={formData.age}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* City + Pincode */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                required
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pincode
-              </label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleChange}
-                required
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Product Subscription */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product Subscription Details
-            </label>
-            <textarea
-              name="productSubscription"
-              value={formData.productSubscription}
-              onChange={handleChange}
+              className={inputClass}
               required
-              rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 transition"
-          >
-            Submit Lead
-          </button>
+          {/* Marital Status */}
+          <div>
+            <label className={labelClass}>Marital Status</label>
+            <div className="space-y-2">
+              {["Single", "Married"].map((option) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="marital_status"
+                    value={option}
+                    onChange={handleChange}
+                    required
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Differently Abled */}
+          <div>
+            <label className={labelClass}>Differently Abled</label>
+            <div className="space-y-2">
+              {["Yes", "No"].map((option) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="differently_abled"
+                    value={option}
+                    onChange={handleChange}
+                    required
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Education */}
+          <div>
+            <label className={labelClass}>Education Level</label>
+            <select
+              name="education_level"
+              value={formData.education_level}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            >
+              <option value="">Select</option>
+              <option>Under 10th</option>
+              <option>10th Pass</option>
+              <option>12th Pass</option>
+              <option>Graduate</option>
+              <option>Post Graduate</option>
+            </select>
+          </div>
+
+          {/* Digital Proficiency */}
+          <div>
+            <label className={labelClass}>Digital Proficiency</label>
+            <div className="space-y-2">
+              {["basic", "intermediate", "advance"].map((level) => (
+                <label key={level} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="digital_proficiency_level"
+                    value={formData.digital_proficiency_level}
+                    onChange={handleChange}
+                    required
+                  />
+                  {level}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>English Proficiency</label>
+            <div className="space-y-2">
+              {["basic", "intermediate", "advance"].map((level) => (
+                <label key={level} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="english_proficiency_level"
+                    value={formData.english_proficiency_level}
+                    onChange={handleChange}
+                    required
+                  />
+                  {level}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Certificate */}
+          <div>
+            <label className={labelClass}>
+              Qualification Certificate (Max 5MB)
+            </label>
+
+            <input
+              type="file"
+              onChange={handleFileChange}
+              required
+              className={`${inputClass}
+      file:mr-4
+      file:py-2
+      file:px-4
+      file:rounded-md
+      file:border-0
+      file:text-sm
+      file:font-medium
+      file:bg-blue-50
+      file:text-blue-700
+      hover:file:bg-blue-100
+      cursor-pointer
+    `}
+            />
+          </div>
+
+          {/* Family Income */}
+          <div>
+            <label className={labelClass}>Family Income</label>
+            <select
+              name="family_income"
+              value={formData.family_income}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            >
+              <option value="">Select</option>
+              <option>Less than 3 lakh</option>
+              <option>3–5 lakh</option>
+              <option>5–10 lakh</option>
+              <option>More than 10 lakh</option>
+            </select>
+          </div>
+
+          {/* Bank Account */}
+          <div>
+            <label className={labelClass}>Bank Account Available?</label>
+            <div className="space-y-2">
+              {["Yes", "No"].map((option) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="having_bank_account"
+                    value={option}
+                    required
+                    onChange={handleChange}
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {formData.having_bank_account === "Yes" && (
+            <>
+              <div>
+                <label className={labelClass}>Account Holder Name</label>
+                <input
+                  name="bank_holder_name"
+                  className={inputClass}
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Bank Name</label>
+                <input
+                  name="bank_name"
+                  className={inputClass}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>IFSC Code</label>
+                <input
+                  name="bank_ifsc_code"
+                  className={inputClass}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Account Number</label>
+                <input
+                  name="bank_account_number"
+                  className={inputClass}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
+          <div className="flex justify-center pt-2">
+            <Button type="submit" className="bg-purple" disabled={loading}>
+              {loading ? (
+                <div className=" flex justify-center">
+                  <Loader className=" animate-spin" />
+                </div>
+              ) : (
+                "Create Lead"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </Layout>

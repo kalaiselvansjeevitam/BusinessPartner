@@ -27,52 +27,21 @@ const Login = () => {
   const { mutateAsync: logIn, isPending } = login();
 
   console.log(logIn);
+
   const handleLogin = async () => {
     setSubmitted(true);
-
     if (!loginData.username || !loginData.password) return;
 
-    const STATIC_USERNAME = "BusinessPartner1";
-    const STATIC_PASSWORD = "BP@123";
-
     try {
-      if (
-        loginData.username !== STATIC_USERNAME ||
-        loginData.password !== STATIC_PASSWORD
-      ) {
-        setErrorMessage("Invalid username or password");
-        return;
-      }
-
-      setErrorMessage("");
-
-      sessionStorage.setItem("session_token", "static_session_token");
-      sessionStorage.setItem("username", STATIC_USERNAME);
-
+      const res = await logIn(loginData);
+      console.log("API RESPONSE", res);
+      sessionStorage.setItem("session_token", res.session_token);
+      sessionStorage.setItem("user_id", res.user_id);
       navigate(ROUTE_URL.dashboard);
     } catch (error: any) {
-      setErrorMessage("Something went wrong. Please try again.");
+      setErrorMessage(error?.response?.data?.message || "Something went wrong");
     }
   };
-
-  // const handleLogin = async () => {
-  //   setSubmitted(true);
-  //   if (!loginData.username || !loginData.password) return;
-
-  //   try {
-  //     // const res = await logIn(loginData);
-  //     // setOpenOtp(true)
-  //     setErrorMessage("");
-  //     // await sessionStorage.setItem("session_token", res.data.session_token);
-  //     // await sessionStorage.setItem("admin_user_id", res.data.id);
-  //     console.log("entered");
-  //     await sessionStorage.setItem("session_token", "res.data.session_token");
-  //     navigate(ROUTE_URL.dashboard);
-  //     console.log("exited");
-  //   } catch (error: any) {
-  //     setErrorMessage(error?.response?.data?.message);
-  //   }
-  // };
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
