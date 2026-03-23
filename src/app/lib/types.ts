@@ -12,6 +12,7 @@ export interface Product {
   lead_rules: string;
   status: string;
   created_at: string;
+  product_logo_url: string;
 }
 
 export interface ProductsDetailPayload {

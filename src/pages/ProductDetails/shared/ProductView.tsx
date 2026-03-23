@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getProductsDetail } from "../../../app/core/api/api.services";
 import { useEffect, useState } from "react";
 import type { ProductDetail } from "../../../app/lib/types";
+import { ROUTE_URL } from "../../../app/core/constants/coreUrl";
 
 export const ProductView = () => {
   const { mutateAsync: productDetails } = getProductsDetail();
@@ -49,15 +50,52 @@ export const ProductView = () => {
       ) : (
         <div className="max-w-5xl mx-auto p-6 space-y-6">
           {/* Back Button */}
-          <div className="flex justify-end">
-            <button
+          <div className="flex justify-between items-center mb-4">
+            {/* Left - Actions */}
+            <div className="flex items-center gap-3">
+              {/* Interest */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-yellow-400 text-yellow-600 hover:bg-yellow-50"
+              >
+                Show Interest
+              </Button>
+
+              {/* Add Leads */}
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() =>
+                  navigate(`${ROUTE_URL.addlead}?ID=${product_Id}`)
+                }
+              >
+                Add Leads
+              </Button>
+
+              {/* View Leads */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() =>
+                  navigate(`${ROUTE_URL.leadsView}?ID=${product_Id}`)
+                }
+              >
+                View Leads
+              </Button>
+            </div>
+
+            {/* Right - Back Button */}
+            <Button
               onClick={() => navigate(-1)}
               type="button"
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-black bg-transparent"
+              variant="outline"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <ArrowLeft size={16} />
               Back
-            </button>
+            </Button>
           </div>
 
           <Section title="Primary Details">

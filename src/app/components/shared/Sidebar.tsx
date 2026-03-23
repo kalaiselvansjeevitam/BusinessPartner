@@ -8,6 +8,8 @@ import { ROUTE_URL } from "../../core/constants/coreUrl";
 // import { ROUTE_URL } from '@/app/core/constants/coreUrl';
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
+import logo from "../../../assets/images/logo.png";
+
 const Sidebar = ({ open, setOpen }: { open: boolean; setOpen: any }) => {
   const isDesktop = useWindowSize();
   const location = useLocation();
@@ -114,22 +116,27 @@ const Sidebar = ({ open, setOpen }: { open: boolean; setOpen: any }) => {
       } bg-white transition-all flex flex-col justify-between overflow-y-auto`}
     >
       <div>
-        <div className="h-[82px] text-center items-center grid border-b border-lightBlue justify-center">
+        <div className="h-[82px] flex items-center justify-center border-b border-lightBlue relative">
           <p
-            className="font-bold cursor-pointer"
+            className="font-bold cursor-pointer flex items-center justify-center"
             onClick={() => setOpen(!open)}
           >
             {isDesktop ? (
               open ? (
-                "Jeevitam Business Partner"
+                <img
+                  src={logo}
+                  alt="CSC Logo"
+                  className="h-18 w-auto transition-all duration-200"
+                />
               ) : (
-                <Menu strokeWidth={3} />
+                <Menu className="h-6 w-6 absolute left-3" />
               )
             ) : (
-              "Jeevitam Business Partner"
+              <img src={logo} alt="CSC Logo" className="h-8 w-auto" />
             )}
           </p>
         </div>
+
         <div className="flex flex-col space-y-2 pl-1 pt-6">
           {sidebarItems.map((item) => (
             <SidebarItem item={item} key={item.label} />
