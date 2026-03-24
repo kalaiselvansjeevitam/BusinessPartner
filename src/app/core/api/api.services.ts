@@ -8,6 +8,7 @@ import type {
   ProductsDetailRes,
   ProductsListPayload,
   ProfileDetailRes,
+  ResMsg,
   StatesRes,
   UpdateProfileDetailRes,
 } from "../../lib/types";
@@ -81,6 +82,15 @@ export const getViewLeads = () =>
     mutationFn: (data: { offset: number; product_id: string }) =>
       POST<LeadListRes>({
         url: API_URL.viewLeads,
+        data,
+      }),
+  });
+
+export const getShowInterest = () =>
+  useMutation({
+    mutationFn: (data: { partner_id: string; product_id: string }) =>
+      POST<ResMsg>({
+        url: API_URL.showInterest,
         data,
       }),
   });

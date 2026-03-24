@@ -2,19 +2,30 @@ import Layout from "../../../app/components/Layout/Layout";
 import { Button } from "../../../app/components/ui/button";
 import { Download, ArrowLeft, Loader } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getProductsDetail } from "../../../app/core/api/api.services";
+import {
+  getProductsDetail,
+  getShowInterest,
+} from "../../../app/core/api/api.services";
 import { useEffect, useState } from "react";
 import type { ProductDetail } from "../../../app/lib/types";
 import { ROUTE_URL } from "../../../app/core/constants/coreUrl";
+import Swal from "sweetalert2";
 
 export const ProductView = () => {
   const { mutateAsync: productDetails } = getProductsDetail();
+  const { mutateAsync: interest } = getShowInterest();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const product_Id = searchParams.get("ID");
+  const userId = sessionStorage.getItem("user_id");
   const [productDetailsData, setProductDetailsData] =
     useState<ProductDetail | null>(null);
+  const interestStatus =
+    productDetailsData?.show_interest_status === "NULL"
+      ? null
+      : productDetailsData?.show_interest_status;
   const [loading, setLoading] = useState(false);
+  const [loadinginterest, setLoadinginterest] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -37,6 +48,54 @@ export const ProductView = () => {
       setLoading(false);
     }
   };
+  const handleInterest = async () => {
+    try {
+      setLoadinginterest(true);
+
+      const response = await interest({
+        product_id: product_Id ?? "",
+        partner_id: userId ?? "",
+      });
+
+      await fetchData();
+      if (response.result.toLowerCase() == "success") {
+        Swal.fire("Success", response?.message, "success");
+      }
+    } catch (error: any) {
+      Swal.fire("Error", error?.response?.data?.message, "error");
+
+      console.error("Interest failed", error);
+    } finally {
+      setLoadinginterest(false);
+    }
+  };
+  const handleProtectedAction = (type: "add" | "view") => {
+    if (!interestStatus) {
+      // NULL
+      Swal.fire({
+        icon: "warning",
+        title: "Needs admin approval",
+        text: 'Please apply - "Show Interest"',
+      });
+      return;
+    }
+
+    if (interestStatus === "Applied") {
+      Swal.fire({
+        icon: "info",
+        title: "Pending Approval",
+        html: `Interest has been shown to the Admin.<br/>Kindly wait for approval.`,
+      });
+      return;
+    }
+
+    // Approved → allow navigation
+    if (type === "add") {
+      navigate(`${ROUTE_URL.addlead}?ID=${product_Id}`);
+    } else {
+      navigate(`${ROUTE_URL.leadsView}?ID=${product_Id}`);
+    }
+  };
 
   return (
     <Layout headerTitle="View Product">
@@ -53,34 +112,40 @@ export const ProductView = () => {
           <div className="flex justify-between items-center mb-4">
             {/* Left - Actions */}
             <div className="flex items-center gap-3">
-              {/* Interest */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-yellow-400 text-yellow-600 hover:bg-yellow-50"
-              >
-                Show Interest
-              </Button>
+              {/* ================= SHOW INTEREST ================= */}
+              {interestStatus === null && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-yellow-400 text-yellow-600 hover:bg-yellow-50"
+                  disabled={loadinginterest}
+                  onClick={handleInterest}
+                >
+                  {loadinginterest ? (
+                    <span className="flex items-center gap-2">
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Submitting...
+                    </span>
+                  ) : (
+                    "Show Interest"
+                  )}
+                </Button>
+              )}
 
-              {/* Add Leads */}
+              {/* ================= ADD LEADS ================= */}
               <Button
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() =>
-                  navigate(`${ROUTE_URL.addlead}?ID=${product_Id}`)
-                }
+                onClick={() => handleProtectedAction("add")}
               >
                 Add Leads
               </Button>
 
-              {/* View Leads */}
+              {/* ================= VIEW LEADS ================= */}
               <Button
                 size="sm"
-                variant="outline"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() =>
-                  navigate(`${ROUTE_URL.leadsView}?ID=${product_Id}`)
-                }
+                onClick={() => handleProtectedAction("view")}
               >
                 View Leads
               </Button>

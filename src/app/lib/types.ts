@@ -34,6 +34,7 @@ export type ProductDetail = {
   whatsapp_template_url: string;
   status: string;
   created_at: string;
+  show_interest_status: string;
 };
 
 export interface ProductsDetailRes {
@@ -98,4 +99,9 @@ export interface LeadListRes {
   result: string;
   total_count: number;
   data: LeadList[];
+}
+
+export interface ResMsg {
+  result: string;
+  message: string;
 }
