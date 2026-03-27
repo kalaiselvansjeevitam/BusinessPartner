@@ -22,4 +22,5 @@ export const API_URL = {
   getStates: "/api/cities_languages/getStates",
   viewLeads: "/api/admin/getLeadsList",
   showInterest: "/api/admin/insertProductPartnerShowInterest",
+  DynamicForm : "/api/admin/getLeadRegistrationQuestionsByProduct",
 };

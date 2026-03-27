@@ -105,3 +105,27 @@ export interface ResMsg {
   result: string;
   message: string;
 }
+
+export type InputElementType =
+  | "short_answer"
+  | "paragraph"
+  | "radio_button"
+  | "checkboxes"
+  | "dropdown"
+  | "file_upload"
+  | "date";
+
+export interface Question {
+  id: string;
+  input_element_type: InputElementType;
+  title: string;
+  is_mandatory: "yes" | "no";
+  preset_values?: string[]; // optional (only for select/radio/checkbox)
+}
+export interface DynamicFormResponse {
+  result: string;
+  message: string;
+  data: {
+    questions: Question[];
+  };
+}

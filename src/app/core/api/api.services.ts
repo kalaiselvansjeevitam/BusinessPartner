@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { POST } from "./axiosInstance";
 import { API_URL } from "../constants/coreUrl";
 import type {
+  DynamicFormResponse,
   LeadListRes,
   Product,
   ProductsDetailPayload,
@@ -91,6 +92,15 @@ export const getShowInterest = () =>
     mutationFn: (data: { partner_id: string; product_id: string }) =>
       POST<ResMsg>({
         url: API_URL.showInterest,
+        data,
+      }),
+  });
+
+export const getDynamicForm = () =>
+  useMutation({
+    mutationFn: (data: { product_id: string }) =>
+      POST<DynamicFormResponse>({
+        url: API_URL.DynamicForm,
         data,
       }),
   });
