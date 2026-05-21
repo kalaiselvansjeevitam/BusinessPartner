@@ -17,6 +17,7 @@ export const ProductView = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const product_Id = searchParams.get("ID");
+  const product_Name = searchParams.get("Product_Name");
   const userId = sessionStorage.getItem("user_id");
   const [productDetailsData, setProductDetailsData] =
     useState<ProductDetail | null>(null);
@@ -91,9 +92,13 @@ export const ProductView = () => {
 
     // Approved → allow navigation
     if (type === "add") {
-      navigate(`${ROUTE_URL.addlead}?ID=${product_Id}`);
+      navigate(
+        `${ROUTE_URL.addlead}?ID=${product_Id}&Product_Name=${product_Name}`,
+      );
     } else {
-      navigate(`${ROUTE_URL.leadsView}?ID=${product_Id}`);
+      navigate(
+        `${ROUTE_URL.leadsView}?ID=${product_Id}&Product_Name=${product_Name}`,
+      );
     }
   };
 

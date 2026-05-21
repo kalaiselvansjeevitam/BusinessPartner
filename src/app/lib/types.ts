@@ -121,6 +121,7 @@ export interface Question {
   title: string;
   is_mandatory: "yes" | "no";
   preset_values?: string[]; // optional (only for select/radio/checkbox)
+  answered: string[] | "";
 }
 export interface DynamicFormResponse {
   result: string;
@@ -128,4 +129,47 @@ export interface DynamicFormResponse {
   data: {
     questions: Question[];
   };
+}
+
+export interface DashboardValue {
+  total_leads_created: number;
+  leads_in_progress: number;
+  leads_converted: number;
+  leads_rejected: number;
+  total_earnings: number;
+  pending_payout: number;
+}
+
+export interface DashboardValueRes {
+  message: string;
+  result: string;
+  data: DashboardValue;
+}
+
+export interface LeadsChartItem {
+  name: string;
+  leads: number;
+}
+
+export interface LeadsChartData {
+  day: LeadsChartItem[];
+  week: LeadsChartItem[];
+  month: LeadsChartItem[];
+}
+
+export interface LeadsChartResponse {
+  result: string;
+  message: string;
+  data: LeadsChartData;
+}
+
+export interface ConversionRatioItem {
+  name: string;
+  value: number;
+}
+
+export interface ConversionRatioResponse {
+  result: string;
+  message: string;
+  data: ConversionRatioItem[];
 }

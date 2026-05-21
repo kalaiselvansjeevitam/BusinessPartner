@@ -69,7 +69,7 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if ([401, 403, 404].includes(error.response?.status)) {
+    if ([403, 404].includes(error.response?.status)) {
       await sessionStorage.removeItem("session_token");
       await Swal.fire(
         "Error",

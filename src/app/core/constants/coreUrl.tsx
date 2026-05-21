@@ -18,9 +18,18 @@ export const API_URL = {
   getProductDetail: "/api/admin/getProductDetails",
   getProfileDetial: "/api/admin/getBusinessPartnerTotalProfileDetails",
   updateProfileDetails: "/api/admin/update-profile-details",
-  addLeads: "/api/admin/createLead",
+  addLeads: "/api/admin/insertLeadRegistrationAnswers",
   getStates: "/api/cities_languages/getStates",
   viewLeads: "/api/admin/getLeadsList",
   showInterest: "/api/admin/insertProductPartnerShowInterest",
-  DynamicForm : "/api/admin/getLeadRegistrationQuestionsByProduct",
+  DynamicForm: "/api/admin/getLeadRegistrationQuestionsByProduct",
+  uploadBPSignedAgreement: "/api/admin/uploadBPSignedAgreement",
+  getLeadValidationRulesByProductAndUserId:
+    "/api/admin/getLeadValidationRulesByProductAndUserId",
+  updateLeadValidationAnswersByProductAndUserId:
+    "/api/admin/updateLeadValidationAnswersByProductAndUserId",
+  getDashboardSummaryValues: "/api/admin/getDashboardSummaryValues",
+  getLeadsRegistraionsCountForLineChart:
+    "/api/admin/getLeadsRegistraionsCountForLineChart",
+  getconversionRatioPieChart: "/api/admin/getconversionRatioPieChart",
 };

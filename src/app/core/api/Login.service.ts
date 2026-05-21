@@ -11,6 +11,7 @@ type loginRes = {
   result: string;
   user_id: string;
   session_token: string;
+  agreement_document_status: string;
 };
 export const login = () =>
   useMutation({

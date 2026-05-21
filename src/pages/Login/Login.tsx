@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { ROUTE_URL } from "../../app/core/constants/coreUrl";
 import { OtpScreen } from "./components/OtpScreen";
 import { login } from "../../app/core/api/Login.service";
+import { uploadBPSignedAgreement } from "../../app/core/api/api.services";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ const Login = () => {
 
   // const { mutateAsync: logIn, isPending } = login();
   const { mutateAsync: logIn, isPending } = login();
+  const { mutateAsync: UploadBPSignedAgreement } = uploadBPSignedAgreement();
 
   console.log(logIn);
 
@@ -35,9 +38,90 @@ const Login = () => {
     try {
       const res = await logIn(loginData);
       console.log("API RESPONSE", res);
-      sessionStorage.setItem("session_token", res.session_token);
-      sessionStorage.setItem("user_id", res.user_id);
-      navigate(ROUTE_URL.dashboard);
+
+      if (res.agreement_document_status === "Applied") {
+        await Swal.fire({
+          icon: "info",
+          title: "Info",
+          html: "You have uploaded the Signed Agreement. <br> Please wait for Admin approval.",
+        });
+      } else if (res.agreement_document_status === "Approved") {
+        console.log("Approved - API RESPONSE", res);
+        sessionStorage.setItem("session_token", res.session_token);
+        sessionStorage.setItem("user_id", res.user_id);
+        navigate(ROUTE_URL.dashboard);
+      } else if (res.agreement_document_status === "Not_Uploaded") {
+        console.log("Not_Uploaded - API RESPONSE", res);
+
+        Swal.fire({
+          title: "Upload Signed Agreement",
+          html: `
+                    <div style="text-align:left">
+                    <a href="https://bp.jeevitam.com/businesspartner/docs/Agreement1_Jeevitam_BusinessPartner_v2.pdf"
+                        target="_blank"
+                        style="display:inline-block;margin-bottom:10px;">
+                        📥 Download Agreement
+                    </a>
+
+                    <br/>
+
+                    <input type="file" id="agreementFile" class="swal2-file" accept=".pdf" />
+
+                    <p style="font-size:12px;margin-top:10px;">
+                        Please upload the signed agreement (PDF only)
+                    </p>
+                    </div>
+                `,
+          showCancelButton: true,
+          confirmButtonText: "Submit",
+          cancelButtonText: "Cancel",
+          showLoaderOnConfirm: true,
+          allowOutsideClick: () => !Swal.isLoading(),
+
+          preConfirm: async () => {
+            const fileInput = document.getElementById(
+              "agreementFile",
+            ) as HTMLInputElement;
+            const file = fileInput?.files?.[0];
+
+            if (!file) {
+              Swal.showValidationMessage(
+                "Please select a file before submitting",
+              );
+              return false;
+            }
+
+            const jsonData = { bp_id: res.user_id };
+
+            const formData = new FormData();
+            formData.append("signed_agreement", file);
+            formData.append("json_data", JSON.stringify(jsonData));
+
+            try {
+              const response = await UploadBPSignedAgreement(formData);
+
+              if (response.result.toLowerCase() !== "success") {
+                throw new Error(response.message);
+              }
+
+              return response; // ✅ stays inside modal
+            } catch (err: any) {
+              console.error(err);
+
+              Swal.showValidationMessage(
+                err?.response?.data?.message || err.message || "Upload failed",
+              );
+
+              return false; // ❗ prevents modal from closing
+            }
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            console.log("#Result: " + result);
+            Swal.fire("Success", result.value.message, "success");
+          }
+        });
+      }
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message || "Something went wrong");
     }
@@ -83,10 +167,12 @@ const Login = () => {
                 Password*
               </Label>
             </div>
+
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-gray-400" />
               </div>
+
               <Input
                 required
                 value={loginData.password}
@@ -110,6 +196,7 @@ const Login = () => {
                 )}
               </button>
             </div>
+
             {submitted && !loginData.password && (
               <p className="text-cherryRed text-sm">This field is required</p>
             )}

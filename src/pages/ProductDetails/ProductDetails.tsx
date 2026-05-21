@@ -116,7 +116,9 @@ export const ProductDetails = () => {
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={() =>
-                      navigate(`${ROUTE_URL.productView}?ID=${product.id}`)
+                      navigate(
+                        `${ROUTE_URL.productView}?ID=${product.id}&Product_Name=${product.product_name}`,
+                      )
                     }
                   >
                     View Details

@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import Layout from "../../../app/components/Layout/Layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../../../app/components/ui/button";
-import { getAddLeads, getDynamicForm } from "../../../app/core/api/api.services";
+import {
+  getAddLeads,
+  getDynamicForm,
+} from "../../../app/core/api/api.services";
 import Swal from "sweetalert2";
 import { ArrowLeft, Loader } from "lucide-react";
 import type { Question } from "../../../app/lib/types";
@@ -17,17 +20,19 @@ export const AddLeads = () => {
 
   const [questions, setQuestions] = useState<Question[]>([]);
   type FormDataType = {
-  [key: string]: string | string[];
-};
+    [key: string]: string | string[];
+  };
 
-const [formData, setFormData] = useState<FormDataType>({});
-type FileItem = {
-  id: string;
-  file: File;
-};
+  const [formData, setFormData] = useState<FormDataType>({});
+  type FileItem = {
+    id: string;
+    file: File;
+  };
 
-const [files, setFiles] = useState<FileItem[]>([]);
-const [fileInputKey, setFileInputKey] = useState<{ [key: string]: number }>({});
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [fileInputKey, setFileInputKey] = useState<{ [key: string]: number }>(
+    {},
+  );
   const [loading, setLoading] = useState(false);
 
   const token = sessionStorage.getItem("session_token");
@@ -38,24 +43,23 @@ const [fileInputKey, setFileInputKey] = useState<{ [key: string]: number }>({});
 
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
- 
   useEffect(() => {
-  const fetchQuestions = async () => {
-    try {
-      const res = await getForm({ product_id: product_Id ?? "" });
+    const fetchQuestions = async () => {
+      try {
+        const res = await getForm({ product_id: product_Id ?? "" });
 
-      console.log("API RES:", res);
+        console.log("API RES:", res);
 
-      if (res?.data?.questions) {
-        setQuestions(res.data.questions);
+        if (res?.data?.questions) {
+          setQuestions(res.data.questions);
+        }
+      } catch (error) {
+        console.error("Failed to fetch form", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch form", error);
-    }
-  };
+    };
 
-  if (product_Id) fetchQuestions();
-}, [product_Id, getForm]);
+    if (product_Id) fetchQuestions();
+  }, [product_Id, getForm]);
 
   const handleChange = (id: string, value: any) => {
     setFormData((prev: any) => ({
@@ -63,7 +67,6 @@ const [fileInputKey, setFileInputKey] = useState<{ [key: string]: number }>({});
       [id]: value,
     }));
   };
-
 
   const handleCheckboxChange = (id: string, option: string) => {
     setFormData((prev: any) => {
@@ -84,77 +87,77 @@ const [fileInputKey, setFileInputKey] = useState<{ [key: string]: number }>({});
   };
 
   const handleFileChange = (id: string, file: File) => {
-  if (file.size > 5 * 1024 * 1024) {
-    alert("File must be less than 5MB");
-    return;
-  }
-
-  setFiles((prev) => {
-    const existingIndex = prev.findIndex((f) => f.id === id);
-
-    if (existingIndex !== -1) {
-      // replace file
-      const updated = [...prev];
-      updated[existingIndex] = { id, file };
-      return updated;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File must be less than 5MB");
+      return;
     }
 
-    // new file
-    return [...prev, { id, file }];
-  });
-};
+    setFiles((prev) => {
+      const existingIndex = prev.findIndex((f) => f.id === id);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+      if (existingIndex !== -1) {
+        // replace file
+        const updated = [...prev];
+        updated[existingIndex] = { id, file };
+        return updated;
+      }
 
-  const payload = new FormData();
-  const answers = questions.map((q) => ({
-    id: q.id,
-    input_element_type: q.input_element_type,
-    value: formData[q.id] || (q.input_element_type === "checkboxes" ? [] : ""),
-  }));
-
-  const fileIds = files.map((f) => f.id);
-
-  const jsonData = {
-    product_id: product_Id || "",
-    answers,
-    file_upload_ids: fileIds,
+      // new file
+      return [...prev, { id, file }];
+    });
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  payload.append("json_data", JSON.stringify(jsonData));
+    const payload = new FormData();
+    const answers = questions.map((q) => ({
+      id: q.id,
+      input_element_type: q.input_element_type,
+      value:
+        formData[q.id] || (q.input_element_type === "checkboxes" ? [] : ""),
+    }));
 
-  files.forEach((f) => {
-    payload.append("upload_files", f.file);
-  });
+    const fileIds = files.map((f) => f.id);
 
-  payload.append("user_id", userId || "");
-  payload.append("session_token", token || "");
+    const jsonData = {
+      product_id: product_Id || "",
+      answers,
+      file_upload_ids: fileIds,
+    };
 
-  try {
-    setLoading(true);
+    payload.append("json_data", JSON.stringify(jsonData));
 
-    const response = await addLead(payload);
+    files.forEach((f) => {
+      payload.append("upload_files", f.file);
+    });
 
-    if (response?.result?.toLowerCase() === "success") {
-      Swal.fire("Success", response.message, "success");
+    payload.append("user_id", userId || "");
+    payload.append("session_token", token || "");
+
+    try {
+      setLoading(true);
+
+      const response = await addLead(payload);
+
+      if (response?.result?.toLowerCase() === "success") {
+        Swal.fire("Success", response.message, "success");
+      }
+    } catch (error: any) {
+      Swal.fire("Error", error?.response?.data?.message || "Error", "error");
+    } finally {
+      setLoading(false);
     }
-  } catch (error: any) {
-    Swal.fire("Error", error?.response?.data?.message || "Error", "error");
-  } finally {
-    setLoading(false);
-  }
-};
-const handleFileRemove = (id: string) => {
-  setFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+  const handleFileRemove = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id));
 
-  // 🔥 reset input by changing key
-  setFileInputKey((prev) => ({
-    ...prev,
-    [id]: (prev[id] || 0) + 1,
-  }));
-};
+    // 🔥 reset input by changing key
+    setFileInputKey((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1,
+    }));
+  };
 
   return (
     <Layout headerTitle="Add Leads">
@@ -165,18 +168,16 @@ const handleFileRemove = (id: string) => {
         >
           {/* Back */}
           <Button
-              onClick={() => navigate(-1)}
-              type="button"
-              variant="outline"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </Button>
+            onClick={() => navigate(-1)}
+            type="button"
+            variant="outline"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
 
-          <h2 className="text-xl font-semibold text-center">
-            Create Lead 
-          </h2>
+          <h2 className="text-xl font-semibold text-center">Create Lead</h2>
 
           {/* ✅ Dynamic Fields */}
           {questions.map((q) => {
@@ -193,9 +194,7 @@ const handleFileRemove = (id: string) => {
                       type="text"
                       className={inputClass}
                       value={formData[q.id] || ""}
-                      onChange={(e) =>
-                        handleChange(q.id, e.target.value)
-                      }
+                      onChange={(e) => handleChange(q.id, e.target.value)}
                       required={required}
                     />
                   </div>
@@ -211,9 +210,7 @@ const handleFileRemove = (id: string) => {
                       rows={3}
                       className={inputClass}
                       value={formData[q.id] || ""}
-                      onChange={(e) =>
-                        handleChange(q.id, e.target.value)
-                      }
+                      onChange={(e) => handleChange(q.id, e.target.value)}
                       required={required}
                     />
                   </div>
@@ -250,9 +247,7 @@ const handleFileRemove = (id: string) => {
                         <input
                           type="checkbox"
                           checked={(formData[q.id] || []).includes(opt)}
-                          onChange={() =>
-                            handleCheckboxChange(q.id, opt)
-                          }
+                          onChange={() => handleCheckboxChange(q.id, opt)}
                         />
                         {opt}
                       </label>
@@ -269,9 +264,7 @@ const handleFileRemove = (id: string) => {
                     <select
                       className={inputClass}
                       value={formData[q.id] || ""}
-                      onChange={(e) =>
-                        handleChange(q.id, e.target.value)
-                      }
+                      onChange={(e) => handleChange(q.id, e.target.value)}
                       required={required}
                     >
                       <option value="">Select</option>
@@ -291,29 +284,29 @@ const handleFileRemove = (id: string) => {
                       {q.title} {required && "*"}
                     </label>
                     <input
-  key={fileInputKey[q.id] || 0} // 🔥 IMPORTANT
-  type="file"
-  className={inputClass}
-  onChange={(e) =>
-    e.target.files &&
-    handleFileChange(q.id, e.target.files[0])
-  }
-  required={required}
-/>
+                      key={fileInputKey[q.id] || 0} // 🔥 IMPORTANT
+                      type="file"
+                      className={inputClass}
+                      onChange={(e) =>
+                        e.target.files &&
+                        handleFileChange(q.id, e.target.files[0])
+                      }
+                      required={required}
+                    />
                     {files.find((f) => f.id === q.id) && (
-  <div className="flex justify-between items-center mt-1">
-    <span className="text-sm text-gray-600">
-      {files.find((f) => f.id === q.id)?.file.name}
-    </span>
-    <button
-      type="button"
-      onClick={() => handleFileRemove(q.id)}
-      className="text-red-500 text-sm"
-    >
-      Remove
-    </button>
-  </div>
-)}
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-sm text-gray-600">
+                          {files.find((f) => f.id === q.id)?.file.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleFileRemove(q.id)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
 
@@ -327,9 +320,7 @@ const handleFileRemove = (id: string) => {
                       type="date"
                       className={inputClass}
                       value={formData[q.id] || ""}
-                      onChange={(e) =>
-                        handleChange(q.id, e.target.value)
-                      }
+                      onChange={(e) => handleChange(q.id, e.target.value)}
                       required={required}
                     />
                   </div>
@@ -343,11 +334,7 @@ const handleFileRemove = (id: string) => {
           {/* Submit */}
           <div className="flex justify-center pt-2">
             <Button type="submit" className="bg-purple" disabled={loading}>
-              {loading ? (
-                <Loader className="animate-spin" />
-              ) : (
-                "Create Lead"
-              )}
+              {loading ? <Loader className="animate-spin" /> : "Create Lead"}
             </Button>
           </div>
         </form>
