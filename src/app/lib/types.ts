@@ -106,6 +106,12 @@ export interface ResMsg {
   message: string;
 }
 
+export interface ResMsgwithData {
+  result: string;
+  message: string;
+  data: string;
+}
+
 export type InputElementType =
   | "short_answer"
   | "paragraph"
@@ -129,6 +135,21 @@ export interface DynamicFormResponse {
   data: {
     questions: Question[];
   };
+}
+
+export interface getDashboardProductsList {
+  product_id: string;
+  product_name: string;
+  total_registrations: string;
+  leads_converted: string;
+  eligible_payout: string;
+}
+
+export interface getDashboardProductsListResponse {
+  result: string;
+  message: string;
+  total_count: string;
+  data: getDashboardProductsList[];
 }
 
 export interface DashboardValue {

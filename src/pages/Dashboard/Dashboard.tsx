@@ -14,14 +14,23 @@ import {
 } from "recharts";
 
 import { Loader } from "lucide-react";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import {
   getconversionRatioPieChart,
+  getDashboardProductsList,
   getDashboardSummaryValues,
   getLeadsRegistraionsCountForLineChart,
+  getProductsLeadsByBusinessPartner,
 } from "../../app/core/api/api.services";
 
 import type { DashboardValue, LeadsChartItem } from "../../app/lib/types";
+import TableComponent, {
+  type Column,
+} from "../../app/components/shared/TableComponent";
+import React from "react";
+import { Button } from "../../app/components/ui/button";
 
 const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
@@ -29,6 +38,9 @@ export const Dashboard = () => {
   /* ---------- API ---------- */
 
   const { mutateAsync: DashboardSummaryValues } = getDashboardSummaryValues();
+  const { mutateAsync: RecentLeads } = getDashboardProductsList();
+  const { mutateAsync: ProductsLeadsByBusinessPartner } =
+    getProductsLeadsByBusinessPartner();
 
   const { mutateAsync: LeadsRegistraionsCountForLineChart } =
     getLeadsRegistraionsCountForLineChart();
@@ -43,7 +55,20 @@ export const Dashboard = () => {
 
   const [pieChartLoading, setPieChartLoading] = useState(false);
 
+  const ITEMS_PER_PAGE = 10;
+
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const [totalItems, setTotalItems] = useState(0);
+
+  const [tableData, setTableData] = useState<any[]>([]);
+
+  const [tableLoading, setTableLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
   const [chartType, setChartType] = useState<"day" | "week" | "month">("day");
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
 
   /* ---------- SUMMARY ---------- */
 
@@ -118,13 +143,102 @@ export const Dashboard = () => {
     }
   };
 
+  const formatDate = (date?: Date) => {
+    if (!date) return "";
+
+    return date.toISOString().split("T")[0];
+  };
+
+  const handleApplyFilter = () => {
+    setCurrentPage(0);
+
+    fetchTableData(0);
+  };
+  const handleApplyDownload = async () => {
+    try {
+      setDownloadLoading(true);
+
+      const offset = currentPage * ITEMS_PER_PAGE;
+
+      const res = await ProductsLeadsByBusinessPartner({
+        offset: offset.toString(),
+        from_date: formatDate(startDate),
+        to_date: formatDate(endDate),
+      });
+
+      if (res.message) {
+        window.open(res.message, "_blank");
+      }
+    } catch (error) {
+      console.error("Download Error", error);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
+  const fetchTableData = async (page = 0) => {
+    try {
+      setTableLoading(true);
+
+      const offset = page * ITEMS_PER_PAGE;
+
+      const res = await RecentLeads({
+        offset: offset.toString(),
+        from_date: formatDate(startDate),
+        to_date: formatDate(endDate),
+      });
+
+      setTableData(res.data || []);
+
+      setTotalItems(Number(res.total_count || 0));
+    } catch (error) {
+      console.error("Table API Error", error);
+    } finally {
+      setTableLoading(false);
+    }
+  };
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  useEffect(() => {
+    fetchTableData(currentPage);
+  }, [currentPage]);
+
   /* ---------- INITIAL LOAD ---------- */
 
   useEffect(() => {
     fetchSummary();
     fetchLineChart();
     fetchPieChart();
+    fetchTableData(currentPage);
   }, []);
+  const columns: Column[] = [
+    {
+      key: "product_id",
+      label: "S.No",
+      align: "center",
+    },
+    {
+      key: "product_name",
+      label: "Product Name",
+      align: "center",
+    },
+    {
+      key: "total_registrations",
+      label: "Total Registrations",
+      align: "center",
+    },
+    {
+      key: "leads_converted",
+      label: "Leads Converted",
+      align: "center",
+    },
+    {
+      key: "eligible_payout",
+      label: "Eligible Payout",
+      align: "center",
+    },
+  ];
 
   /* ---------- STATS ---------- */
 
@@ -154,6 +268,24 @@ export const Dashboard = () => {
       value: `₹${summaryData?.pending_payout ?? 0}`,
     },
   ];
+
+  const CustomInput = React.forwardRef(({ value, onClick }: any, ref: any) => (
+    <button
+      onClick={onClick}
+      ref={ref}
+      className={`border border-gray-700 rounded-md px-3 py-2 text-sm w-[180px] text-left
+        ${value ? "text-black font-bold" : "text-black-400 font-normal"}
+      `}
+    >
+      {value || "Select Date"}
+    </button>
+  ));
+  const normalizeDate = (date: Date | null) => {
+    if (!date) return undefined;
+    const d = new Date(date);
+    d.setHours(12, 0, 0, 0);
+    return d;
+  };
 
   return (
     <Layout headerTitle="Dashboard">
@@ -287,6 +419,73 @@ export const Dashboard = () => {
               ))}
             </div>
           </div>
+        </div>
+        {/* ===== RECENT LEADS TABLE ===== */}
+
+        <div className="bg-white rounded-xl shadow-sm p-6 w-full">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Product List</h3>
+          </div>
+          <div className="flex items-end gap-4 mb-6 flex-wrap">
+            <div className="flex flex-col w-[180px]">
+              <span className="text-sm font-semibold mb-1">From</span>
+
+              <ReactDatePicker
+                selected={startDate}
+                onChange={(date: any) =>
+                  setStartDate(normalizeDate(date || undefined))
+                }
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput />}
+                popperClassName="z-50"
+              />
+            </div>
+
+            <div className="flex flex-col w-[180px]">
+              <span className="text-sm font-semibold mb-1">To</span>
+
+              <ReactDatePicker
+                selected={endDate}
+                onChange={(date: any) =>
+                  setEndDate(normalizeDate(date || undefined))
+                }
+                dateFormat="dd/MM/yyyy"
+                minDate={startDate}
+                customInput={<CustomInput />}
+                popperClassName="z-50"
+              />
+            </div>
+
+            <Button
+              onClick={handleApplyFilter}
+              className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-md text-sm font-medium h-[42px]"
+            >
+              Submit
+            </Button>
+
+            <Button
+              onClick={handleApplyDownload}
+              disabled={downloadLoading}
+              className="ml-auto bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-md text-sm font-medium h-[42px]"
+            >
+              {downloadLoading ? "Downloading..." : "Download Data"}
+            </Button>
+          </div>
+
+          {tableLoading ? (
+            <div className="h-40 flex items-center justify-center">
+              <Loader className="w-6 h-6 animate-spin" />
+            </div>
+          ) : (
+            <TableComponent
+              columns={columns}
+              data={tableData}
+              itemsPerPage={ITEMS_PER_PAGE}
+              currentPage={currentPage}
+              totalItems={totalItems}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       </div>
     </Layout>

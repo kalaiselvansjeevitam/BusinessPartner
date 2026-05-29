@@ -23,6 +23,9 @@ export const API_URL = {
   viewLeads: "/api/admin/getLeadsList",
   showInterest: "/api/admin/insertProductPartnerShowInterest",
   DynamicForm: "/api/admin/getLeadRegistrationQuestionsByProduct",
+  getDashboardProductsList: "/api/admin/getDashboardProductsList",
+  getProductsLeadsByBusinessPartner:
+    "/api/admin/getProductsLeadsByBusinessPartner",
   uploadBPSignedAgreement: "/api/admin/uploadBPSignedAgreement",
   getLeadValidationRulesByProductAndUserId:
     "/api/admin/getLeadValidationRulesByProductAndUserId",

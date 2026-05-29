@@ -5,6 +5,7 @@ import type {
   ConversionRatioResponse,
   DashboardValueRes,
   DynamicFormResponse,
+  getDashboardProductsListResponse,
   LeadListRes,
   LeadsChartResponse,
   Product,
@@ -13,6 +14,7 @@ import type {
   ProductsListPayload,
   ProfileDetailRes,
   ResMsg,
+  ResMsgwithData,
   StatesRes,
   UpdateProfileDetailRes,
 } from "../../lib/types";
@@ -165,5 +167,30 @@ export const getconversionRatioPieChart = () =>
     mutationFn: () =>
       POST<ConversionRatioResponse>({
         url: API_URL.getconversionRatioPieChart,
+      }),
+  });
+export const getDashboardProductsList = () =>
+  useMutation({
+    mutationFn: (data: {
+      from_date: string;
+      to_date: string;
+      offset: string;
+    }) =>
+      POST<getDashboardProductsListResponse>({
+        url: API_URL.getDashboardProductsList,
+        data,
+      }),
+  });
+
+export const getProductsLeadsByBusinessPartner = () =>
+  useMutation({
+    mutationFn: (data: {
+      from_date: string;
+      to_date: string;
+      offset: string;
+    }) =>
+      POST<ResMsgwithData>({
+        url: API_URL.getProductsLeadsByBusinessPartner,
+        data,
       }),
   });
